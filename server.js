@@ -1,41 +1,61 @@
-// update my current code according to your code :
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const dotenv = require('dotenv');
 const connectDB = require('./config/database');
 
-// Load env vars
+// ================= LOAD ENV VARIABLES =================
 dotenv.config();
 
-// Connect to database
+// ================= CONNECT DATABASE =================
 connectDB();
 
 const app = express();
 
-// Middleware
-app.use(cors());
+// ================= MIDDLEWARE =================
+app.use(
+  cors({
+    origin: '*', // allow all (safe for now; can restrict later)
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  })
+);
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Serve static files
-// app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-// Add after other route imports
+// ================= TEST ROUTES =================
+
+// Root test route (VERY IMPORTANT for Render 404 check)
+app.get('/', (req, res) => {
+  res.send('Backend is running successfully 🚀');
+});
+
+// API test route
 app.use('/api/test', require('./routes/testRoutes'));
-// Routes
+
+// ================= MAIN ROUTES =================
 app.use('/api/admin', require('./routes/adminRoutes'));
 app.use('/api/gallery', require('./routes/galleryRoutes'));
 app.use('/api/announcements', require('./routes/announcementRoutes'));
 app.use('/api/careers', require('./routes/careerRoutes'));
 
-// Error handling middleware
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ error: 'Something went wrong!' });
+// ================= 404 HANDLER =================
+app.use((req, res) => {
+  res.status(404).json({ error: 'API route not found' });
 });
 
+// ================= ERROR HANDLER =================
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({
+    error: 'Something went wrong!',
+    details: err.message,
+  });
+});
+
+// ================= START SERVER =================
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`🚀 Server running on port ${PORT}`);
 });
