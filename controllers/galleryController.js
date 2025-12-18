@@ -1,18 +1,20 @@
 const Gallery = require('../models/Gallery');
 
-/* ================= CREATE GALLERY ITEM ================= */
+/* =========================
+   CREATE GALLERY ITEM
+========================= */
 exports.createGalleryItem = async (req, res) => {
   try {
     const { title, description, category } = req.body;
 
     // ✅ Cloudinary image URL
-    const imageUrl = req.file ? req.file.path : '';
+    const image = req.file ? req.file.path : '';
 
     const galleryItem = new Gallery({
       title,
       description,
       category,
-      image: imageUrl, // IMPORTANT: save Cloudinary URL
+      image,          // IMPORTANT: store Cloudinary URL
       isActive: true,
     });
 
@@ -28,12 +30,13 @@ exports.createGalleryItem = async (req, res) => {
   }
 };
 
-/* ================= GET ALL ACTIVE (PUBLIC) ================= */
+/* =========================
+   GET ALL ACTIVE (PUBLIC)
+========================= */
 exports.getAllGalleryItems = async (req, res) => {
   try {
-    const items = await Gallery.find({ isActive: true }).sort({
-      createdAt: -1,
-    });
+    const items = await Gallery.find({ isActive: true })
+      .sort({ createdAt: -1 });
 
     res.json({
       success: true,
@@ -44,7 +47,9 @@ exports.getAllGalleryItems = async (req, res) => {
   }
 };
 
-/* ================= GET BY ID ================= */
+/* =========================
+   GET BY ID
+========================= */
 exports.getGalleryItemById = async (req, res) => {
   try {
     const item = await Gallery.findById(req.params.id);
@@ -62,7 +67,9 @@ exports.getGalleryItemById = async (req, res) => {
   }
 };
 
-/* ================= UPDATE GALLERY ITEM ================= */
+/* =========================
+   UPDATE GALLERY ITEM
+========================= */
 exports.updateGalleryItem = async (req, res) => {
   try {
     const updates = {
@@ -70,7 +77,7 @@ exports.updateGalleryItem = async (req, res) => {
       updatedAt: Date.now(),
     };
 
-    // ✅ If new image uploaded, replace with Cloudinary URL
+    // ✅ If new image uploaded → replace with Cloudinary URL
     if (req.file) {
       updates.image = req.file.path;
     }
@@ -94,7 +101,9 @@ exports.updateGalleryItem = async (req, res) => {
   }
 };
 
-/* ================= DELETE (SOFT DELETE) ================= */
+/* =========================
+   DELETE (SOFT DELETE)
+========================= */
 exports.deleteGalleryItem = async (req, res) => {
   try {
     const item = await Gallery.findByIdAndUpdate(
@@ -116,10 +125,13 @@ exports.deleteGalleryItem = async (req, res) => {
   }
 };
 
-/* ================= ADMIN: GET ALL ================= */
+/* =========================
+   ADMIN: GET ALL
+========================= */
 exports.getAllGalleryItemsAdmin = async (req, res) => {
   try {
-    const items = await Gallery.find().sort({ createdAt: -1 });
+    const items = await Gallery.find()
+      .sort({ createdAt: -1 });
 
     res.json({
       success: true,
