@@ -1,66 +1,79 @@
 const Gallery = require('../models/Gallery');
 
-// Create gallery item
+/* ================= CREATE GALLERY ITEM ================= */
 exports.createGalleryItem = async (req, res) => {
   try {
     const { title, description, category } = req.body;
-    const imageUrl = req.file ? `/uploads/${req.file.filename}` : '';
+
+    // ✅ Cloudinary image URL
+    const imageUrl = req.file ? req.file.path : '';
 
     const galleryItem = new Gallery({
       title,
       description,
-      imageUrl,
-      category
+      category,
+      image: imageUrl, // IMPORTANT: save Cloudinary URL
+      isActive: true,
     });
 
     await galleryItem.save();
+
     res.status(201).json({
       success: true,
-      data: galleryItem
+      data: galleryItem,
     });
   } catch (error) {
+    console.error('Create Gallery Error:', error);
     res.status(500).json({ error: error.message });
   }
 };
 
-// Get all gallery items
+/* ================= GET ALL ACTIVE (PUBLIC) ================= */
 exports.getAllGalleryItems = async (req, res) => {
   try {
-    const items = await Gallery.find({ isActive: true })
-      .sort({ createdAt: -1 });
+    const items = await Gallery.find({ isActive: true }).sort({
+      createdAt: -1,
+    });
+
     res.json({
       success: true,
-      data: items
+      data: items,
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
 
-// Get gallery item by ID
+/* ================= GET BY ID ================= */
 exports.getGalleryItemById = async (req, res) => {
   try {
     const item = await Gallery.findById(req.params.id);
+
     if (!item) {
       return res.status(404).json({ error: 'Gallery item not found' });
     }
+
     res.json({
       success: true,
-      data: item
+      data: item,
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
 
-// Update gallery item
+/* ================= UPDATE GALLERY ITEM ================= */
 exports.updateGalleryItem = async (req, res) => {
   try {
-    const updates = req.body;
+    const updates = {
+      ...req.body,
+      updatedAt: Date.now(),
+    };
+
+    // ✅ If new image uploaded, replace with Cloudinary URL
     if (req.file) {
-      updates.imageUrl = `/uploads/${req.file.filename}`;
+      updates.image = req.file.path;
     }
-    updates.updatedAt = Date.now();
 
     const item = await Gallery.findByIdAndUpdate(
       req.params.id,
@@ -74,14 +87,14 @@ exports.updateGalleryItem = async (req, res) => {
 
     res.json({
       success: true,
-      data: item
+      data: item,
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
 
-// Delete gallery item
+/* ================= DELETE (SOFT DELETE) ================= */
 exports.deleteGalleryItem = async (req, res) => {
   try {
     const item = await Gallery.findByIdAndUpdate(
@@ -96,20 +109,21 @@ exports.deleteGalleryItem = async (req, res) => {
 
     res.json({
       success: true,
-      message: 'Gallery item deleted successfully'
+      message: 'Gallery item deleted successfully',
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
 
-// Get all gallery items (admin)
+/* ================= ADMIN: GET ALL ================= */
 exports.getAllGalleryItemsAdmin = async (req, res) => {
   try {
     const items = await Gallery.find().sort({ createdAt: -1 });
+
     res.json({
       success: true,
-      data: items
+      data: items,
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
