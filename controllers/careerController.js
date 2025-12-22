@@ -133,7 +133,7 @@ exports.updateCareer = async (req, res) => {
       updates.responsibilities = [updates.responsibilities];
     }
     
-    updates.updatedAt = Date.now();
+    // updates.updatedAt = Date.now();
     
     const career = await Career.findByIdAndUpdate(
       req.params.id,

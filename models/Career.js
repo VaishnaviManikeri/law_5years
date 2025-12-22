@@ -43,21 +43,15 @@ const careerSchema = new mongoose.Schema({
   experienceRequired: {
     type: String,
     trim: true
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now
-  },
-  updatedAt: {
-    type: Date,
-    default: Date.now
   }
+}, {
+  timestamps: true   // ✅ AUTO handles createdAt & updatedAt
 });
 
-// Update the updatedAt field on save
-careerSchema.pre('save', function(next) {
-  this.updatedAt = Date.now();
-  next();
-});
+// ❌ REMOVE THIS BLOCK COMPLETELY
+// careerSchema.pre('save', function(next) {
+//   this.updatedAt = Date.now();
+//   next();
+// });
 
 module.exports = mongoose.model('Career', careerSchema);
